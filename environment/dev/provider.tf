@@ -8,7 +8,7 @@ terraform {
     }
   }
   backend "azurerm" {
-    resource_group_name  = "backed-infra-rg"
+    resource_group_name  = "backend-infra-rg"
     storage_account_name = "backendstorageaccount2"
     container_name       = "tfstate"
     key                  = "infra.terraform.tfstate"
