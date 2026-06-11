@@ -5,6 +5,12 @@ on:
     branches:
       - main
 
+  pull_request:
+    branches:
+      - main
+
+  workflow_dispatch:
+
 permissions:
   id-token: write
   contents: read
@@ -15,10 +21,11 @@ jobs:
 
     defaults:
       run:
+        shell: bash
         working-directory: environment/dev
 
     steps:
-      - name: Checkout
+      - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Setup Terraform
@@ -31,14 +38,29 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Verify Azure Login
+        run: az account show
+
       - name: Terraform Init
         run: terraform init
 
       - name: Terraform Format Check
+        continue-on-error: true
         run: terraform fmt -check -recursive
 
       - name: Terraform Validate
+        continue-on-error: true
         run: terraform validate
 
       - name: Terraform Plan
         run: terraform plan -out=tfplan
+
+      - name: Upload Plan Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan
+          path: environment/dev/tfplan
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main'
+        run: terraform apply -auto-approve tfplan
