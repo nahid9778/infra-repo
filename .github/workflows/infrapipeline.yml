@@ -42,17 +42,22 @@ jobs:
         run: az account show
 
       - name: Terraform Init
+        working-directory: environment/dev
         run: terraform init
 
       - name: Terraform Format Check
+        working-directory: environment/dev
         run: terraform fmt -check
 
       - name: Terraform Validate
+        working-directory: environment/dev
         run: terraform validate
 
       - name: Terraform Plan
+        working-directory: environment/dev
         run: terraform plan -out=tfplan
 
       - name: Terraform Apply
+        working-directory: environment/dev
         if: github.ref == 'refs/heads/main'
         run: terraform apply -auto-approve tfplan
